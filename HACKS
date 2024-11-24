@@ -1,0 +1,458 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Clean Hub", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+local Tab = Window:MakeTab({
+	Name = "Main",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+local Section = Tab:AddSection({
+	Name = "Fun"
+})
+OrionLib:MakeNotification({
+	Name = "CleanHub",
+	Content = "Executed",
+	Image = "rbxassetid://4483345998",
+	Time = 5 
+})  
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Clean Hub", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+local Tab = Window:MakeTab({
+	Name = "Main",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+local Section = Tab:AddSection({
+	Name = "Fun"
+})
+OrionLib:MakeNotification({
+	Name = "CleanHub",
+	Content = "Executed",
+	Image = "rbxassetid://4483345998",
+	Time = 5 
+})  
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Clean Hub", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+local Tab = Window:MakeTab({
+	Name = "Main",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+local Section = Tab:AddSection({
+	Name = "Fun"
+})
+OrionLib:MakeNotification({
+	Name = "CleanHub",
+	Content = "Executed",
+	Image = "rbxassetid://4483345998",
+	Time = 5 
+})  
+Tab:AddSlider({
+    Name = "Fly Speed",
+    Min = 1,
+    Max = 1000,
+    Default = 50,  -- Default fly speed is set to 50
+    Color = Color3.fromRGB(255, 255, 255),
+    Increment = 1,
+    ValueName = "Speed",
+    Callback = function(Value)
+        flySpeed = Value  -- Adjust flySpeed when the slider value changes
+        print("Fly speed set to: " .. flySpeed)
+    end    
+})
+
+Tab:AddButton({
+    Name = "Toggle Fly",
+    Callback = function()
+        -- Variables
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        local UIS = game:GetService("UserInputService")
+        local RunService = game:GetService("RunService")
+        local camera = workspace.CurrentCamera
+
+        local flying = false
+        local bodyVelocity, bodyGyro
+
+        -- Function to start flying
+        local function startFlying()
+            if flying then return end
+            flying = true
+
+            -- Create BodyVelocity and BodyGyro to control movement
+            bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.MaxForce = Vector3.new(1e4, 1e4, 1e4) -- Allow full control
+            bodyVelocity.Velocity = Vector3.zero
+            bodyVelocity.Parent = humanoidRootPart
+
+            bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.MaxTorque = Vector3.new(1e4, 1e4, 1e4) -- Allow rotation control
+            bodyGyro.CFrame = humanoidRootPart.CFrame
+            bodyGyro.P = 3000
+            bodyGyro.Parent = humanoidRootPart
+
+            print("Flying enabled!")
+        end
+
+        -- Function to stop flying
+        local function stopFlying()
+            if not flying then return end
+            flying = false
+
+            -- Clean up BodyVelocity and BodyGyro
+            if bodyVelocity then bodyVelocity:Destroy() end
+            if bodyGyro then bodyGyro:Destroy() end
+
+            print("Flying disabled!")
+        end
+
+        -- Toggle flying with the X key
+        UIS.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            if input.KeyCode == Enum.KeyCode.X then
+                if flying then
+                    stopFlying()
+                else
+                    startFlying()
+                end
+            end
+        end)
+
+        -- Update flying mechanics
+        RunService.RenderStepped:Connect(function()
+            if flying and bodyVelocity and bodyGyro then
+                -- Calculate movement direction based on camera orientation
+                local moveDirection = Vector3.new(0, 0, 0)
+                if UIS:IsKeyDown(Enum.KeyCode.W) then
+                    moveDirection = moveDirection + camera.CFrame.LookVector
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then
+                    moveDirection = moveDirection - camera.CFrame.LookVector
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then
+                    moveDirection = moveDirection - camera.CFrame.RightVector
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then
+                    moveDirection = moveDirection + camera.CFrame.RightVector
+                end
+
+                -- Apply vertical movement based on camera pitch
+                local upMovement = 0
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then
+                    upMovement = 1
+                elseif UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+                    upMovement = -1
+                end
+
+                -- Only apply velocity if there is some movement (non-zero direction)
+                if moveDirection.Magnitude > 0 or upMovement ~= 0 then
+                    moveDirection = moveDirection.Unit * flySpeed + Vector3.new(0, upMovement * flySpeed, 0)
+                    bodyVelocity.Velocity = moveDirection
+                else
+                    bodyVelocity.Velocity = Vector3.zero
+                end
+
+                -- Keep the character's orientation stable
+                bodyGyro.CFrame = CFrame.new(humanoidRootPart.Position, humanoidRootPart.Position + camera.CFrame.LookVector)
+            end
+        end)
+    end    
+})
+Tab:AddButton({
+	Name = "Toggle Noclip|N to toggle",
+	Callback = function()
+		-- Variables
+		local player = game.Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()
+		local UIS = game:GetService("UserInputService")
+		local RunService = game:GetService("RunService")
+		
+		local noclip = false -- Noclip toggle state
+
+		-- Function to toggle noclip
+		local function toggleNoclip()
+			noclip = not noclip
+			if noclip then
+				print("Noclip enabled!")
+			else
+				print("Noclip disabled!")
+			end
+		end
+
+		-- Keybind to toggle noclip
+		UIS.InputBegan:Connect(function(input, gameProcessed)
+			if gameProcessed then return end
+			if input.KeyCode == Enum.KeyCode.N then
+				toggleNoclip()
+			end
+		end)
+
+		-- Noclip logic
+		RunService.Stepped:Connect(function()
+			if noclip and character then
+				-- Disable collisions for all character parts
+				for _, part in pairs(character:GetDescendants()) do
+					if part:IsA("BasePart") and part.CanCollide then
+						part.CanCollide = false
+					end
+				end
+			elseif character then
+				-- Re-enable collisions when noclip is disabled
+				for _, part in pairs(character:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = true
+					end
+				end
+			end
+		end)
+	end
+})
+Tab:AddSlider({
+	Name = "Walk Speed",
+	Min = 1,
+	Max = 1000,
+	Default = 16, -- Default walk speed
+	Color = Color3.fromRGB(255, 255, 255),
+	Increment = 1,
+	ValueName = "Speed",
+	Callback = function(Value)
+		-- Get the player's humanoid and set the walk speed
+		local player = game.Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+
+		-- Set the player's walk speed to the value from the slider
+		humanoid.WalkSpeed = Value
+
+		-- Print the current walk speed to the output
+		print("Walk Speed set to: " .. Value)
+	end  
+})
+Tab:AddButton({
+    Name = "Enable ESP",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+
+        -- Function to create the ESP for a player
+        local function createESP(targetPlayer)
+            -- Check if the player's character exists
+            local character = targetPlayer.Character
+            if not character then return end
+
+            -- Wait for necessary parts to exist
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart", 10)
+            local head = character:WaitForChild("Head", 10)
+            local humanoid = character:WaitForChild("Humanoid", 10)
+
+            -- Create the ESP container (BillboardGui)
+            local espFolder = game.CoreGui:FindFirstChild("ESP") or Instance.new("Folder", game.CoreGui)
+            espFolder.Name = "ESP"
+
+            -- Create the BillboardGui to display the ESP
+            local billboard = Instance.new("BillboardGui")
+            billboard.Parent = espFolder
+            billboard.Adornee = head
+            billboard.Size = UDim2.new(0, 100, 0, 50)  -- Size of the ESP display
+            billboard.StudsOffset = Vector3.new(0, 3, 0)  -- Position above the player's head
+            billboard.AlwaysOnTop = true  -- Always visible
+
+            -- Create the Background for the ESP
+            local background = Instance.new("Frame")
+            background.Parent = billboard
+            background.Size = UDim2.new(1, 0, 1, 0)
+            background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            background.BackgroundTransparency = 0.5
+            background.BorderSizePixel = 0
+
+            -- Create the player's username text label
+            local usernameLabel = Instance.new("TextLabel")
+            usernameLabel.Parent = background
+            usernameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+            usernameLabel.Text = targetPlayer.Name
+            usernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            usernameLabel.TextSize = 14
+            usernameLabel.BackgroundTransparency = 1
+            usernameLabel.TextStrokeTransparency = 0.8
+
+            -- Create the health text label
+            local healthLabel = Instance.new("TextLabel")
+            healthLabel.Parent = background
+            healthLabel.Size = UDim2.new(1, 0, 0.5, 0)
+            healthLabel.Position = UDim2.new(0, 0, 0.5, 0)
+            healthLabel.Text = "Health: " .. math.floor(humanoid.Health)
+            healthLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            healthLabel.TextSize = 14
+            healthLabel.BackgroundTransparency = 1
+            healthLabel.TextStrokeTransparency = 0.8
+
+            -- Create the distance text label to show the distance in studs
+            local distanceLabel = Instance.new("TextLabel")
+            distanceLabel.Parent = background
+            distanceLabel.Size = UDim2.new(1, 0, 0.5, 0)
+            distanceLabel.Position = UDim2.new(0, 0, 1, 0)
+            distanceLabel.Text = "Distance: --"
+            distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            distanceLabel.TextSize = 14
+            distanceLabel.BackgroundTransparency = 1
+            distanceLabel.TextStrokeTransparency = 0.8
+
+            -- Update health label dynamically
+            humanoid.HealthChanged:Connect(function()
+                healthLabel.Text = "Health: " .. math.floor(humanoid.Health)
+            end)
+
+            -- Create the BoxHandleAdornment to highlight the hitbox
+            local boxAdornment = Instance.new("BoxHandleAdornment")
+            boxAdornment.Parent = character
+            boxAdornment.Adornee = humanoidRootPart  -- Attach it to the HumanoidRootPart
+            boxAdornment.Size = humanoidRootPart.Size * 1.5  -- Size of the hitbox (scaled up a bit)
+            boxAdornment.Transparency = 0.5
+            boxAdornment.Color3 = Color3.fromRGB(255, 0, 0)  -- Red color
+            boxAdornment.AlwaysOnTop = true
+
+            -- Update the distance label dynamically
+            game:GetService("RunService").Heartbeat:Connect(function()
+                local distance = (humanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                distanceLabel.Text = "Distance: " .. math.floor(distance) .. " studs"
+            end)
+
+            -- Remove ESP and BoxAdornment when the player dies or leaves
+            targetPlayer.CharacterAdded:Connect(function()
+                wait(1)
+                if billboard then
+                    billboard:Destroy()
+                end
+                if boxAdornment then
+                    boxAdornment:Destroy()
+                end
+                if distanceLabel then
+                    distanceLabel:Destroy()
+                end
+            end)
+        end
+
+        -- Create ESP for all players already in the game
+        for _, targetPlayer in pairs(game.Players:GetPlayers()) do
+            if targetPlayer.Character then
+                createESP(targetPlayer)
+            end
+        end
+
+        -- Listen for new players and enable ESP for them
+        game.Players.PlayerAdded:Connect(function(targetPlayer)
+            targetPlayer.CharacterAdded:Connect(function()
+                createESP(targetPlayer)
+            end)
+        end)
+
+        -- Remove ESP when a player leaves
+        game.Players.PlayerRemoving:Connect(function(targetPlayer)
+            local espFolder = game.CoreGui:FindFirstChild("ESP")
+            if espFolder then
+                local esp = espFolder:FindFirstChild(targetPlayer.Name)
+                if esp then
+                    esp:Destroy()
+                end
+            end
+            -- Remove the hitbox highlight when the player leaves
+            local boxAdornment = targetPlayer.Character:FindFirstChildOfClass("BoxHandleAdornment")
+            if boxAdornment then
+                boxAdornment:Destroy()
+            end
+        end)
+    end    
+})
+Tab:AddButton({
+	Name = "Aimbot BETA!|0 to toggle",
+	Callback = function()
+		local player = game.Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+		local mouse = player:GetMouse()
+		local camera = workspace.CurrentCamera
+
+		local aimbotEnabled = false
+		local targetPart = nil
+		local aimSpeed = 10  -- How fast the aim moves toward the target
+
+		-- Function to toggle aimbot on
+		local function enableAimbot()
+			aimbotEnabled = true
+			print("Aimbot enabled!")
+		end
+
+		-- Function to toggle aimbot off
+		local function disableAimbot()
+			aimbotEnabled = false
+			print("Aimbot disabled!")
+		end
+
+		-- Update the aim position towards the target
+		local function updateAim()
+			if aimbotEnabled and targetPart then
+				local targetPosition = targetPart.Position
+				local currentPosition = camera.CFrame.Position
+
+				-- Smoothly rotate the camera towards the target position
+				local direction = (targetPosition - currentPosition).unit
+				local newCFrame = camera.CFrame:Lerp(CFrame.new(camera.CFrame.Position, targetPosition), aimSpeed * game:GetService("RunService").Heartbeat:Wait())
+				camera.CFrame = newCFrame
+			end
+		end
+
+		-- Function to find the nearest target (example for players)
+		local function findTarget()
+			local closestDistance = math.huge
+			targetPart = nil
+
+			-- Loop through all the players in the game to find the nearest one
+			for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+				if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+					local target = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+					if target then
+						-- Check if the target is within range and in view
+						local distance = (camera.CFrame.Position - target.Position).Magnitude
+						if distance < closestDistance then
+							-- Check if the target is visible (i.e., not obstructed)
+							local ray = Ray.new(camera.CFrame.Position, (target.Position - camera.CFrame.Position).unit * distance)
+							local hitPart, hitPos = workspace:FindPartOnRay(ray, character)
+							
+							if not hitPart or hitPart:IsDescendantOf(otherPlayer.Character) then
+								closestDistance = distance
+								targetPart = target  -- Set the nearest player's HumanoidRootPart as the target
+							end
+						end
+					end
+				end
+			end
+		end
+
+		-- Toggle the aimbot on/off with the '0' key
+		local UIS = game:GetService("UserInputService")
+		UIS.InputBegan:Connect(function(input, gameProcessed)
+			if gameProcessed then return end
+			if input.KeyCode == Enum.KeyCode.Zero then
+				if aimbotEnabled then
+					disableAimbot()
+				else
+					enableAimbot()
+				end
+			end
+		end)
+
+		-- Continuously update the aim while the aimbot is enabled
+		game:GetService("RunService").Heartbeat:Connect(function()
+			if aimbotEnabled then
+				findTarget()  -- Continuously find the nearest target
+				updateAim()  -- Continuously update the aim
+			end
+		end)
+	end    
+})
+local Tab = Window:MakeTab({
+	Name = "Info",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+Tab:AddParagraph("Made by @qpig. Love you. Dm for tutorial")
+OrionLib:Init()
