@@ -61,7 +61,7 @@ Tab:AddSlider({
 })
 
 Tab:AddButton({
-    Name = "Toggle Fly",
+    Name = "Toggle Fly|X to toggle",
     Callback = function()
         -- Variables
         local player = game.Players.LocalPlayer
