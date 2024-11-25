@@ -449,6 +449,125 @@ Tab:AddButton({
 		end)
 	end    
 })
+Tab:AddButton({
+    Name = "Rainbow Skin",
+    Callback = function()
+        -- Variables
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local isActive = false
+        local RunService = game:GetService("RunService")
+        
+        -- Function to start the rainbow effect
+        local function startRainbow()
+            isActive = true
+            print("Rainbow Skin activated!")
+            
+            -- Change colors in a loop
+            local connection
+            connection = RunService.RenderStepped:Connect(function()
+                if not isActive then
+                    connection:Disconnect()
+                    return
+                end
+                
+                -- Cycle through hues
+                for hue = 0, 1, 0.01 do
+                    if not isActive then break end
+                    local color = Color3.fromHSV(hue, 1, 1)
+                    
+                    -- Apply the color to all body parts
+                    for _, part in pairs(character:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            part.Color = color
+                        end
+                    end
+                    
+                    -- Wait for a short duration to create a smooth transition
+                    RunService.RenderStepped:Wait()
+                end
+            end)
+        end
+        
+        -- Function to stop the rainbow effect
+        local function stopRainbow()
+            isActive = false
+            print("Rainbow Skin deactivated!")
+        end
+
+        -- Toggle rainbow effect
+        if not isActive then
+            startRainbow()
+        else
+            stopRainbow()
+        end
+    end    
+})
+Tab:AddButton({
+    Name = "Toggle Kill All",
+    Callback = function()
+        -- Variables
+        local player = game.Players.LocalPlayer
+        local UIS = game:GetService("UserInputService")
+        local RunService = game:GetService("RunService")
+        local running = false
+        local connection
+        
+        -- Function to execute the Kill All script
+        local function killAll()
+            local character = player.Character or player.CharacterAdded:Wait()
+            local tool = character:FindFirstChildOfClass("Tool")
+            local weaponHandle = tool and tool:FindFirstChild("Handle")
+            
+            if not tool or not weaponHandle then
+                print("No valid weapon equipped!")
+                return
+            end
+
+            for _, targetPlayer in pairs(game.Players:GetPlayers()) do
+                if targetPlayer ~= player then
+                    local targetCharacter = targetPlayer.Character
+                    if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") and targetCharacter:FindFirstChild("Humanoid") then
+                        local humanoid = targetCharacter:FindFirstChild("Humanoid")
+                        if humanoid.Health > 0 then
+                            -- Teleport weapon handle to the target's position
+                            weaponHandle.CFrame = targetCharacter.HumanoidRootPart.CFrame
+                            wait(0.1) -- Small delay for effect
+                        end
+                    end
+                end
+            end
+        end
+        
+        -- Function to toggle the Kill All feature
+        local function toggleKillAll()
+            if running then
+                print("Kill All deactivated!")
+                running = false
+                if connection then
+                    connection:Disconnect()
+                    connection = nil
+                end
+            else
+                print("Kill All activated!")
+                running = true
+                connection = RunService.Stepped:Connect(function()
+                    if running then
+                        killAll()
+                    end
+                end)
+            end
+        end
+        
+        -- Bind toggle to the "T" key
+        UIS.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            if input.KeyCode == Enum.KeyCode.T then
+                toggleKillAll()
+            end
+        end)
+    end    
+})
 local Tab = Window:MakeTab({
 	Name = "Info",
 	Icon = "rbxassetid://4483345998",
